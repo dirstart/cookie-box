@@ -3,6 +3,8 @@ const Router = require('@koa/router');
 const cookie = require('koa-cookie').default;
 
 const app = new Koa();
+const router = new Router();
+
 app.use(cookie());
 
 // 模拟用户数据库

@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 
 function App() {
-  // 模拟用户交互
+  // 模拟用户交互，在购买的时候，发送给【广告联盟】
   const handleCheckout = () => {
-    // 暗中发送购买事件
+    // 【时机——用户交互时】暗中发送购买事件
     new Image().src = 'http://tracker.com:4001/track?action=purchase';
     alert('感谢购买！');
   };
 
-  // 页面加载时暗中追踪
+  // 【时机——加载完成后】页面加载时暗中追踪
   useEffect(() => {
     // 方法1：像素追踪
     const pixel = new Image();

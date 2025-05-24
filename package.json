@@ -4,14 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "server": "cd ./third-party && node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@koa/cors": "^5.0.0",
     "@koa/router": "^13.1.0",
+    "axios": "^1.9.0",
     "koa": "^3.0.0",
-    "koa-cookie": "^1.0.0"
+    "koa-cookie": "^1.0.0",
+    "koa-static": "^5.0.0",
+    "path": "^0.12.7",
+    "react": "^19.1.0"
   }
 }

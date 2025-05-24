@@ -3,37 +3,41 @@ const Router = require('@koa/router');
 const cookie = require('koa-cookie').default;
 
 const app = new Koa();
+const router = new Router();
+
 app.use(cookie());
 
-// 模拟用户ID生成
-const generateUserId = () => Math.random().toString(36).substring(2, 10);
+// 模拟用户数据库
+const userDatabase = new Map();
 
-// 隐藏式设置第三方Cookie
 router.get('/track', (ctx) => {
-  // 检查是否已有追踪Cookie
+  // 获取或生成用户ID
   let userId = ctx.cookies.get('tracker_id');
-  
-  if (!userId) {
-    userId = generateUserId();
+  const isNewUser = !userId;
+
+  if (isNewUser) {
+    userId = `user_${Math.floor(Math.random() * 1000000)}`;
     ctx.cookies.set('tracker_id', userId, {
       httpOnly: true,
       sameSite: 'none',
-      secure: false, // 开发环境关闭，生产必须true
+      secure: false, // 开发环境禁用，生产环境必须true
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1年
-      domain: 'tracker.com' // 模拟跨域
+      domain: 'tracker.com' // 关键：跨域Cookie
     });
-    console.log('🎯 新用户追踪ID:', userId);
-  } else {
-    console.log('🔍 识别到老用户:', userId);
+    userDatabase.set(userId, { firstSeen: new Date() });
   }
 
-  // 记录用户行为（模拟）
-  const page = ctx.query.page || 'unknown';
-  console.log(`📊 用户 ${userId} 访问了 ${page} 页面`);
+  // 记录访问行为
+  const userData = userDatabase.get(userId) || {};
+  userData.lastSeen = new Date();
+  userData.pageViews = (userData.pageViews || 0) + 1;
+  userDatabase.set(userId, userData);
 
-  // 返回透明的1x1像素GIF（经典追踪技术）
+  // 返回透明像素
   ctx.set('Content-Type', 'image/gif');
   ctx.body = Buffer.from('R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==', 'base64');
+
+  console.log(`[Tracker] ${isNewUser ? '新用户' : '老用户'}: ${userId}`);
 });
 
 app.use(router.routes());

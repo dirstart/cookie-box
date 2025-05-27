@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=, initial-scale=1.0"
+  >
+  <title>简易的银行系统</title>
+</head>
+<style>
+  .hidden {
+    display: none;
+  }
+</style>
+
+<body>
+  <!-- 登录界面 -->
+  <div id="userLogin">
+    <h2>用户登录</h2>
+    <div class="login-form">
+      <input
+        type="text"
+        placeholder="用户名"
+        value="chp"
+        id="userName"
+      >
+      <input
+        type="password"
+        id="userPsd"
+      >
+    </div>
+    <button onclick="handleLogin()">登录</button>
+  </div>
+  <!-- 登录成功后的页面 -->
+  <div
+    id="userContent"
+    class="hidden"
+  >
+    <h2>用户登录成功</h2>
+    <p>欢迎回来，demochUser！</p>
+    <p>您的账户安全级别为：【几乎没有】</p>
+  </div>
+  <button onclick="handleLogout()">登出</button>
+  <input
+    id="money"
+    type="number"
+    value="1000"
+    placeholder="请输入您要转账的金额"
+  />
+  <button onclick="transfer()">转账</button>
+</body>
+<script>
+  const handleLogin = () => {
+    const name = document.getElementById('userName').value;
+    const psd = document.getElementById('userPsd').value;
+    if (!name || !psd) {
+      alert('请输入用户名和密码')
+      return false;
+    }
+    fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json', // ✅ 必须设置
+      },
+      body: JSON.stringify({
+        name,
+        psd
+      })
+    }).then(res => res.json()).then(res => {
+      if (res.code === 200) {
+        document.getElementById('userLogin').classList.add('hidden');
+        document.getElementById('userContent').classList.remove('hidden');
+        return;
+      }
+      alert(res.msg);
+    })
+  }
+  const handleLogout = () => {
+    fetch('/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json', // ✅ 必须设置
+      },
+      credentials: 'include'
+    }).then(res => res.json()).then(res => {
+      if (res.code === 200) {
+        document.getElementById('userLogin').classList.remove('hidden');
+        document.getElementById('userContent').classList.add('hidden');
+        alert('登出成功')
+        return;
+      }
+      alert(res.msg);
+    })
+  }
+  const transfer = () => {
+    const money = document.getElementById('money').value;
+    if (!money) {
+      alert('请输入金额');
+      return false;
+    }
+    fetch('/transfer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json', // ✅ 必须设置
+      },
+      body: JSON.stringify({
+        money
+      })
+    }).then(res => res.json()).then(res => {
+      console.log('🍀🍀🍀🍀', res)
+      if (res.code === 200) {
+        alert('转账成功');
+        return;
+      } else {
+        alert(res.msg)
+      }
+    })
+  }
+</script>
+
+</html>

@@ -72,6 +72,7 @@
       if (res.code === 200) {
         document.getElementById('userLogin').classList.add('hidden');
         document.getElementById('userContent').classList.remove('hidden');
+        localStorage.setItem('_t', res.token);
         return;
       }
       alert(res.msg);
@@ -106,7 +107,8 @@
         'Content-Type': 'application/json', // ✅ 必须设置
       },
       body: JSON.stringify({
-        money
+        money,
+        token: localStorage.getItem('_t')
       })
     }).then(res => res.json()).then(res => {
       console.log('🍀🍀🍀🍀', res)

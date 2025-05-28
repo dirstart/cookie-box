@@ -6,6 +6,8 @@ const bodyParser = require('koa-bodyparser')
 const serve = require('koa-static');
 // koa 维护登录状态
 const session = require('koa-session').default;
+// koa 跨域
+const cors = require('@koa/cors');
 // 配置 https 服务器
 const https = require('https');
 const fs = require('fs');
@@ -17,16 +19,27 @@ const router = new Router();
 
 // session 配置
 app.keys = ['sercret-bank-key'];
+// bodyParser 必须在 CSRF 之前
 app.use(bodyParser())
+// cors 配置
+app.use(cors({
+  origin: '*',
+  credentials: true, // 允许发送 Cookie
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // 允许的 HTTP 方法
+  maxAge: 86400,
+}))
 app.use(session({
   key: 'koa.sess',
   maxAge: 86400000, // 1天，ms
   httpOnly: true, // 防止 xss 攻击
   secure: true, // 启用 HTTPS
   signed: true, // 防止篡改
+  sameSite: 'None', // 允许跨域
+  // sameSite: 'Strict',
+  // sameSite: 'Lax',
 }, app))
-app.use(serve(path.join(__dirname)))
 
+app.use(serve(path.join(__dirname)))
 
 router.all('/login', (ctx) => {
   const {
@@ -42,10 +55,12 @@ router.all('/login', (ctx) => {
     }
   } else {
     ctx.session.user = name;
-    ctx.session.authenticated = true;
+    ctx.session.loginStatus = true;
+    ctx.session.csrfToken = Math.random().toString(36).slice(2); // 随机字符串
     ctx.body = {
       code: 200,
-      msg: '登录成功'
+      msg: '登录成功',
+      csrfToken: ctx.session.csrfToken
     }
   }
 })
@@ -62,16 +77,21 @@ router.all('/logout', (ctx) => {
 })
 
 router.all('/transfer', (ctx) => {
-  if (!ctx.session.authenticated) {
+  if (!ctx.session.loginStatus) {
     ctx.body = {
-      status: 403,
       code: 0,
       msg: '请先登录'
     }
     return;
   }
-
-  const { money } = ctx.request.body;
+  const { money = '默认的', token } = ctx.request.body;
+  // if (!token) {
+  //   ctx.body = {
+  //     code: 0,
+  //     msg: '没有权限标识，请先登录'
+  //   }
+  //   return;
+  // }
   ctx.body = {
     status: 200,
     code: 200,

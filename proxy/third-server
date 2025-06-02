@@ -1,0 +1,17 @@
+const Koa = require('koa')
+
+const app = new Koa()
+
+app.use(async (ctx) => {
+  if (ctx.path === '/getData') {
+    ctx.body = {
+        name: 'chp',
+        age: 23,
+        address: '北京'
+    }
+  }
+})
+
+app.listen(8088, () => {
+  console.log('服务器启动成功，端口号为：8088')
+})
